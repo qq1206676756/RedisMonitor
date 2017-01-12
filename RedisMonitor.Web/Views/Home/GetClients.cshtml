@@ -1,0 +1,49 @@
+﻿@using RedisMonitor.Core.Model
+@{
+    ViewBag.Title = "客户端信息";
+}
+@{
+    var clients = ViewBag.Clients as List<ClientInfoModel>;
+}
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th title="客户机的主机">Host</th>
+            <th title="端口">Port</th>
+            <th title="连接的总持续时间以秒为单位">AgeSeconds</th>
+            <th title="当前的数据库ID">Database</th>
+            <th title="连接的空闲时间(单位秒)">IdleSeconds</th>
+            <th title="最后一个命令中">LastCommand</th>
+            <th title="订阅数量">PatternSubscriptionCount</th>
+            @*<th title="原始内容">Raw</th>*@
+            <th title="订阅频道数量">SubscriptionCount</th>
+            <th title="执行事务的命令数量">TransactionCommandLength</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (clients != null)
+            {
+                foreach (var item in clients)
+                {
+                <tr class="info">
+                    <td>@item.Host</td>
+                    <td>@item.Port</td>
+                    <td>@(item.AgeSeconds)s</td>
+                    <td>@item.Database</td>
+                    <td>@(item.IdleSeconds)s</td>
+                    <td>@item.LastCommand</td>
+                    <td>@item.PatternSubscriptionCount</td>
+                    @*<td>@item.Raw</td>*@
+                    <td>@item.SubscriptionCount</td>
+                    <td>@item.TransactionCommandLength</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td>暂无客户端连接</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,31 @@
+﻿@{
+    ViewBag.Title = "Clients";
+}
+<div class="table-responsive" id="clentLists">
+</div>
+<script>
+    var serverId = '@Request["serverId"]';
+    var clientView = {
+        loadClients: function () {
+            $.ajax({
+                type: "get",
+                url: "/Home/GetClients",
+                data: {
+                    serverId: serverId
+                },
+                dataType: "html",
+                success: function (data) {
+                    if (data != null) {
+                        $("#clentLists").html(data);
+                    }
+                }
+            });
+            setTimeout(clientView.loadClients, $("#select_time").val() * 1000);
+        }
+    };
+    $(function () {
+        $(function () {
+            clientView.loadClients();
+        });
+    });
+</script>

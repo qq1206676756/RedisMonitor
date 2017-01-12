@@ -1,0 +1,164 @@
+﻿@using RedisMonitor.Core.Extension
+
+@{
+    Layout = null;
+}
+@{
+    var infoMsginfo = ViewBag.InfoMsg as Dictionary<string, Dictionary<string, string>>;
+}
+<link href="~/Scripts/bootstrap-modal/css/bootstrap-modal.css" rel="stylesheet" />
+<link href="~/Scripts/bootstrap-modal/css/bootstrap-modal-bs3patch.css" rel="stylesheet" />
+
+<div style="line-height: 2em; font-weight: 700" id="infoRichMsg">
+    @if (infoMsginfo != null)
+    {
+        foreach (var info in infoMsginfo)
+        {
+            <div class="panel panel-primary" data-infokey="@info.Key">
+                <div class="panel-heading">
+                    <h3 class="panel-title">@info.Key</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        @foreach (var item in info.Value)
+                        {
+                            <div class="col-sm-4">
+                                @if (item.Value.RelaceIsNum())
+                                {
+                                    <p><span onclick="richView.openwindow('@item.Key');" class="text-primary" style="cursor:pointer">@item.Key</span>: <span class="label label-default" data-infokey="@item.Key">@item.Value</span></p>
+                                }
+                                else
+                                {
+                                    <p>@item.Key : <span class="label label-default" data-infokey="@item.Key">@item.Value</span></p>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<div id="chartModal" class="modal fade" tabindex="-1" data-width="860" style="display: none;">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">数据监控</h4>
+    </div>
+    <div class="modal-body">
+        <div id="chartContainer" style="height: 420px; width: 800px;">
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" data-dismiss="modal" class="btn btn-default">关闭</button>
+    </div>
+</div>
+
+<script src="~/Scripts/echarts/echarts.common.min.js"></script>
+<script src="~/Scripts/bootstrap-modal/js/bootstrap-modal.js"></script>
+<script src="~/Scripts/bootstrap-modal/js/bootstrap-modalmanager.js"></script>
+<script>
+    var serverId = '@Request["serverId"]';
+    var richView = {
+        serverId: serverId,
+        chartData: [],
+        chartInfoKey: '',
+        chartContainer: echarts.init(document.getElementById('chartContainer')),
+        isShowChart: false,
+        loadInfoMsg: function () {
+            $.ajax({
+                type: "get",
+                url: "/Home/RichDetailsData",
+                data: {
+                    serverId: richView.serverId
+                },
+                dataType: "json",
+                success: function (data) {
+                    var $divs = $("#infoRichMsg div[data-infokey]");
+                    $divs.each(function () {
+                        //分组的Key
+                        var infokey = $(this).data("infokey");
+                        for (var key in data) {
+                            if (key === infokey) {
+                                //指标的key
+                                var $spans = $(this).find("span[data-infokey]");
+                                $spans.each(function () {
+                                    var infos = data[infokey];
+                                    for (var itemKey in infos) {
+                                        if (itemKey === $(this).data("infokey")) {
+                                            $(this).text(infos[itemKey]);
+                                            if (itemKey === richView.chartInfoKey && richView.isShowChart) {
+                                                var reg = /[a-zA-Z]/g;
+                                                richView.chartData[richView.chartData.length] = [new Date, infos[itemKey].replace(reg, "")];
+                                                richView.createChart();
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+            setTimeout(richView.loadInfoMsg, $("#select_time").val() * 1000);
+        },
+        createChart: function () {
+            var option = {
+                title: {
+                    text: richView.chartInfoKey + " 数据监控"
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                toolbox: {
+                    show: true,
+                    feature: {
+                        mark: { show: true },
+                        dataView: { show: true, readOnly: false },
+                        magicType: { show: true, type: ['line', 'bar', 'stack', 'tiled'] },
+                        restore: { show: true },
+                        saveAsImage: { show: true }
+                    }
+                },
+                xAxis: [
+                    {
+                        type: 'time',
+                        splitLine: {
+                            show: false
+                        }
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: [
+                    {
+                        name: richView.chartInfoKey,
+                        type: 'line',
+                        data: richView.chartData,
+                        showSymbol: false,
+                        hoverAnimation: false
+                    }
+                ]
+            };
+            // 使用刚指定的配置项和数据显示图表。
+            richView.chartContainer.setOption(option);
+        },
+        openwindow: function (infoKey) {
+            richView.chartInfoKey = infoKey;
+            richView.isShowChart = true;
+            richView.createChart();
+            $("#chartModal").modal('show');
+            //关闭触发事件
+            $('#chartModal').on('hide.bs.modal', function () {
+                richView.chartData = [];
+                richView.isShowChart = false;
+            });
+        }
+    };
+    $(function () {
+        richView.loadInfoMsg();
+    });
+</script>

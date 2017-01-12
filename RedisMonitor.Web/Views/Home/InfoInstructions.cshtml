@@ -1,0 +1,170 @@
+﻿@{
+    ViewBag.Title = "Info命令说明";
+}
+<h2>参考来源：<a href="http://www.runoob.com/redis/server-info.html" target="_blank"> http://www.runoob.com/redis/server-info.html </a> </h2>
+<div class="article-body" style="line-height:2em">
+    <div class="article-intro" id="content">
+        <h1>Redis Info 命令</h1>
+        <p>
+            Redis Info 命令以一种易于理解和阅读的格式，返回关于 Redis 服务器的各种信息和统计数值。
+        </p>
+        <p>通过给定可选的参数 section ，可以让命令只返回某一部分的信息：</p>
+        <ul>
+            <li>
+                <p>server : 一般 Redis 服务器信息，包含以下域：</p>
+                <ul>
+                    <li>redis_version : Redis 服务器版本</li>
+                    <li>redis_git_sha1 : Git SHA1</li>
+                    <li>redis_git_dirty : Git dirty flag</li>
+                    <li>os : Redis 服务器的宿主操作系统</li>
+                    <li>arch_bits : 架构（32 或 64 位）</li>
+                    <li>multiplexing_api : Redis 所使用的事件处理机制</li>
+                    <li>gcc_version : 编译 Redis 时所使用的 GCC 版本</li>
+                    <li>process_id : 服务器进程的 PID</li>
+                    <li>run_id : Redis 服务器的随机标识符（用于 Sentinel 和集群）</li>
+                    <li>tcp_port : TCP/IP 监听端口</li>
+                    <li>uptime_in_seconds : 自 Redis 服务器启动以来，经过的秒数</li>
+                    <li>uptime_in_days : 自 Redis 服务器启动以来，经过的天数</li>
+                    <li>lru_clock : 以分钟为单位进行自增的时钟，用于 LRU 管理</li>
+                </ul>
+            </li>
+            <li>
+                <p>clients : 已连接客户端信息，包含以下域：</p>
+                <ul>
+                    <li>connected_clients : 已连接客户端的数量（不包括通过从属服务器连接的客户端）</li>
+                    <li>client_longest_output_list : 当前连接的客户端当中，最长的输出列表</li>
+                    <li>client_longest_input_buf : 当前连接的客户端当中，最大输入缓存</li>
+                    <li>blocked_clients : 正在等待阻塞命令（BLPOP、BRPOP、BRPOPLPUSH）的客户端的数量</li>
+                </ul>
+            </li>
+            <li>
+                <p>memory : 内存信息，包含以下域：</p>
+                <ul>
+                    <li>used_memory : 由 Redis 分配器分配的内存总量，以字节（byte）为单位</li>
+                    <li>used_memory_human : 以人类可读的格式返回 Redis 分配的内存总量</li>
+                    <li>used_memory_rss : 从操作系统的角度，返回 Redis 已分配的内存总量（俗称常驻集大小）。这个值和 top 、 ps 等命令的输出一致。</li>
+                    <li>used_memory_peak : Redis 的内存消耗峰值（以字节为单位）</li>
+                    <li>used_memory_peak_human : 以人类可读的格式返回 Redis 的内存消耗峰值</li>
+                    <li>used_memory_lua : Lua 引擎所使用的内存大小（以字节为单位）</li>
+                    <li>mem_fragmentation_ratio : used_memory_rss 和 used_memory 之间的比率</li>
+                    <li>mem_allocator : 在编译时指定的， Redis 所使用的内存分配器。可以是 libc 、 jemalloc 或者 tcmalloc 。</li>
+                </ul>
+                <p>
+                    在理想情况下， used_memory_rss 的值应该只比 used_memory 稍微高一点儿。
+                </p><p>
+                    当 rss &gt; used ，且两者的值相差较大时，表示存在（内部或外部的）内存碎片。
+                </p><p>
+                    内存碎片的比率可以通过 mem_fragmentation_ratio 的值看出。
+                </p><p>
+                    当 used &gt; rss 时，表示 Redis 的部分内存被操作系统换出到交换空间了，在这种情况下，操作可能会产生明显的延迟。
+                </p><p>
+                    当 Redis 释放内存时，分配器可能会，也可能不会，将内存返还给操作系统。
+                </p><p>
+                    如果 Redis 释放了内存，却没有将内存返还给操作系统，那么 used_memory 的值可能和操作系统显示的 Redis 内存占用并不一致。
+                </p><p>
+                    查看 used_memory_peak 的值可以验证这种情况是否发生。
+                </p>
+            </li>
+            <li>
+                <p>persistence : RDB 和 AOF 的相关信息</p>
+            </li>
+            <li>
+                <p>stats : 一般统计信息</p>
+            </li>
+            <li>
+                <p>replication : 主/从复制信息</p>
+            </li>
+            <li>
+                <p>cpu : CPU 计算量统计信息</p>
+            </li>
+            <li>
+                <p>commandstats : Redis 命令统计信息</p>
+            </li>
+            <li>
+                <p>cluster : Redis 集群信息</p>
+            </li>
+            <li>
+                <p>keyspace : 数据库相关的统计信息</p>
+            </li>
+        </ul>
+        <h3>语法</h3>
+        <p> redis Info 命令基本语法如下：</p>
+<pre class="prettyprint prettyprinted"><span class="pln">redis </span><span class="lit">127.0</span><span class="pun">.</span><span class="lit">0.1</span><span class="pun">:</span><span class="lit">6379</span><span class="pun">&gt;</span><span class="pln"> INFO </span><span class="pun">[</span><span class="pln">section</span><span class="pun">]</span><span class="pln"> </span></pre>
+        <h3>
+            可用版本
+        </h3>
+        <p>
+            &gt;= 1.0.0
+        </p>
+        <h3>
+            返回值
+        </h3>
+        <p>
+            字符串，文本行的集合。
+        </p>
+        <h3>实例</h3>
+<pre class="prettyprint prettyprinted"><span class="pln">redis </span><span class="lit">127.0</span><span class="pun">.</span><span class="lit">0.1</span><span class="pun">:</span><span class="lit">6379</span><span class="pun">&gt;</span><span class="pln"> INFO
+</span><span class="com"># Server</span><span class="pln">
+redis_version</span><span class="pun">:</span><span class="lit">2.5</span><span class="pun">.</span><span class="lit">9</span><span class="pln">
+redis_git_sha1</span><span class="pun">:</span><span class="lit">473f3090</span><span class="pln">
+redis_git_dirty</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+os</span><span class="pun">:</span><span class="typ">Linux</span><span class="pln"> </span><span class="lit">3.3</span><span class="pun">.</span><span class="lit">7</span><span class="pun">-</span><span class="lit">1</span><span class="pun">-</span><span class="pln">ARCH i686
+arch_bits</span><span class="pun">:</span><span class="lit">32</span><span class="pln">
+multiplexing_api</span><span class="pun">:</span><span class="pln">epoll
+gcc_version</span><span class="pun">:</span><span class="lit">4.7</span><span class="pun">.</span><span class="lit">0</span><span class="pln">
+process_id</span><span class="pun">:</span><span class="lit">8104</span><span class="pln">
+run_id</span><span class="pun">:</span><span class="pln">bc9e20c6f0aac67d0d396ab950940ae4d1479ad1
+tcp_port</span><span class="pun">:</span><span class="lit">6379</span><span class="pln">
+uptime_in_seconds</span><span class="pun">:</span><span class="lit">7</span><span class="pln">
+uptime_in_days</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+lru_clock</span><span class="pun">:</span><span class="lit">1680564</span><span class="pln">
+</span><span class="com"># Clients</span><span class="pln">
+connected_clients</span><span class="pun">:</span><span class="lit">1</span><span class="pln">
+client_longest_output_list</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+client_biggest_input_buf</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+blocked_clients</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+</span><span class="com"># Memory</span><span class="pln">
+used_memory</span><span class="pun">:</span><span class="lit">439304</span><span class="pln">
+used_memory_human</span><span class="pun">:</span><span class="lit">429.01K</span><span class="pln">
+used_memory_rss</span><span class="pun">:</span><span class="lit">13897728</span><span class="pln">
+used_memory_peak</span><span class="pun">:</span><span class="lit">401776</span><span class="pln">
+used_memory_peak_human</span><span class="pun">:</span><span class="lit">392.36K</span><span class="pln">
+used_memory_lua</span><span class="pun">:</span><span class="lit">20480</span><span class="pln">
+mem_fragmentation_ratio</span><span class="pun">:</span><span class="lit">31.64</span><span class="pln">
+mem_allocator</span><span class="pun">:</span><span class="pln">jemalloc</span><span class="pun">-</span><span class="lit">3.0</span><span class="pun">.</span><span class="lit">0</span><span class="pln">
+</span><span class="com"># Persistence</span><span class="pln">
+loading</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+rdb_changes_since_last_save</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+rdb_bgsave_in_progress</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+rdb_last_save_time</span><span class="pun">:</span><span class="lit">1338011402</span><span class="pln">
+rdb_last_bgsave_status</span><span class="pun">:</span><span class="pln">ok
+rdb_last_bgsave_time_sec</span><span class="pun">:-</span><span class="lit">1</span><span class="pln">
+rdb_current_bgsave_time_sec</span><span class="pun">:-</span><span class="lit">1</span><span class="pln">
+aof_enabled</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+aof_rewrite_in_progress</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+aof_rewrite_scheduled</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+aof_last_rewrite_time_sec</span><span class="pun">:-</span><span class="lit">1</span><span class="pln">
+aof_current_rewrite_time_sec</span><span class="pun">:-</span><span class="lit">1</span><span class="pln">
+</span><span class="com"># Stats</span><span class="pln">
+total_connections_received</span><span class="pun">:</span><span class="lit">1</span><span class="pln">
+total_commands_processed</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+instantaneous_ops_per_sec</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+rejected_connections</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+expired_keys</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+evicted_keys</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+keyspace_hits</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+keyspace_misses</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+pubsub_channels</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+pubsub_patterns</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+latest_fork_usec</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+</span><span class="com"># Replication</span><span class="pln">
+role</span><span class="pun">:</span><span class="pln">master
+connected_slaves</span><span class="pun">:</span><span class="lit">0</span><span class="pln">
+</span><span class="com"># CPU</span><span class="pln">
+used_cpu_sys</span><span class="pun">:</span><span class="lit">0.03</span><span class="pln">
+used_cpu_user</span><span class="pun">:</span><span class="lit">0.01</span><span class="pln">
+used_cpu_sys_children</span><span class="pun">:</span><span class="lit">0.00</span><span class="pln">
+used_cpu_user_children</span><span class="pun">:</span><span class="lit">0.00</span><span class="pln">
+</span><span class="com"># Keyspace</span></pre>
+    </div>
+</div>

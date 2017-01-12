@@ -1,0 +1,129 @@
+﻿@using RedisMonitor.Core.Model
+@{
+    ViewBag.Title = "监控列表";
+}
+@{
+    var redisServers = ViewBag.RedisServers as List<RedisServerModel>;
+}
+<br />
+<!--操作栏-->
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title">操作</h3>
+    </div>
+    <div class="panel-body" style="padding-bottom: 2px;">
+        <form class="form-horizontal" role="form">
+            <div class="form-group form-group-lg has-success has-feedback">
+                <label class="col-sm-2 control-label" for="select_time">刷新频率：</label>
+                <div class="col-sm-4">
+                    <select class="form-control" id="select_time">
+                        <option value="2">2s</option>
+                        <option value="5" selected>5s</option>
+                        <option value="20">20s</option>
+                        <option value="40">40s</option>
+                        <option value="60">1分钟</option>
+                        <option value="300">5分钟</option>
+                        <option value="600">10分钟</option>
+                        <option value="1800">30分钟</option>
+                    </select>
+                </div>
+                <label class="col-sm-2 control-label" for="select_time">修改了配置文件,请戳</label>
+                <div class="col-sm-4">
+                    <button type="button" class="btn btn-primary" onclick="refreshList()">
+                        <span class="glyphicon glyphicon-refresh"></span>点击刷新
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!--监控列表-->
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title">监控列表</h3>
+    </div>
+    <div class="panel-body">
+        <div class="table-responsive" style="min-height:500px;">
+            <table class="table table-bordered table-hover" id="table_redis">
+                <thead>
+                    <tr>
+                        <th>ServerId</th>
+                        <th>配置地址</th>
+                        <th style="width:10%">描述</th>
+                        <th>状态</th>
+                        <th>响应时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (redisServers != null)
+                    {
+                        foreach (var item in redisServers)
+                        {
+                    <tr class="active">
+                        <td class="ServerId">@item.ServerId</td>
+                        <td class="ServerHost"><a title="查看详情" target="_blank" href="/Home/Details?ServerId=@item.ServerId">@item.ServerHost</a></td>
+                        <td class="ServerDescribe">@item.ServerDescribe</td>
+                        <td class="Status">--</td>
+                        <td class="ResponseTime">--</td>
+                    </tr>
+                        }
+                    }
+                    else
+                    {
+                    <tr>
+                        <td>暂无配置的Redis服务器列表</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        $(function () {
+            updateStatus();
+        });
+
+        function updateStatus() {
+            var $serverIds = $(".ServerId");
+            $serverIds.each(function () {
+                var $td = $(this);
+                $.ajax({
+                    type: "get",
+                    url: "/Home/GetRedisStatus",
+                    data: {
+                        serverId: $td.text()
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data != null) {
+                            var $tr = $td.parent();
+                            $tr.removeClass("active");
+                            if (data.IsConnection) {
+                                $tr.addClass("success");
+                            } else {
+                                $tr.addClass("danger");
+                            }
+                            $td.nextAll(".Status").text(data.Status);
+                            $td.nextAll(".ResponseTime").text(data.ResponseTime + "ms");
+                        }
+                    }
+                });
+            });
+            setTimeout(updateStatus, $("#select_time").val() * 1000);
+        }
+
+        function refreshList() {
+            $.ajax({
+                type: "get",
+                url: "/Home/RefreshServerConfig",
+                success: function (data) {
+                    location.reload(true);
+                }
+            });
+        }
+    </script>
+}

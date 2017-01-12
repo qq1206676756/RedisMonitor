@@ -1,0 +1,28 @@
+﻿@{
+    Layout = null;
+}
+<div style="line-height: 2em;font-weight:700"  id="infoSimpleMsg">
+</div>
+
+<script>
+    var simpleView = {
+        serverId: '@Request["serverId"]',
+        loadInfoMsg: function () {
+            $.ajax({
+                type: "get",
+                url: "/Home/SimpleDetailsData",
+                data: {
+                    serverId: simpleView.serverId
+                },
+                dataType: "json",
+                success: function (data) {
+                    $("#infoSimpleMsg").html(data);
+                }
+            });
+            setTimeout(simpleView.loadInfoMsg, $("#select_time").val() * 1000);
+        }
+    };
+    $(function () {
+        simpleView.loadInfoMsg();
+    });
+</script>

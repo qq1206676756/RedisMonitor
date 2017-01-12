@@ -1,0 +1,40 @@
+﻿@using RedisMonitor.Core.Model
+@{
+    ViewBag.Title = "BaseRedisStatus";
+}
+@{
+    var redisServermodel = ViewBag.RedisServer as RedisServerModel;
+    var serverResponse = ViewBag.serverResponse as RedisServerResponseModel;
+}
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>ServerId</th>
+                <th>配置地址</th>
+                <th style="width:10%">描述</th>
+                <th>状态</th>
+                <th>响应时间</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (redisServermodel != null && serverResponse != null)
+            {
+                <tr class=@(serverResponse.IsConnection? "success" : "danger")>
+                    <td class="ServerId">@redisServermodel.ServerId</td>
+                    <td class="ServerHost">@redisServermodel.ServerHost</td>
+                    <td class="ServerDescribe">@redisServermodel.ServerDescribe</td>
+                    <td class="Status">@serverResponse.Status</td>
+                    <td class="ResponseTime">@(serverResponse.ResponseTime)ms</td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td>暂无配置的Redis服务器列表</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
